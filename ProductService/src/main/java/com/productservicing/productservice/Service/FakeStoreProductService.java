@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 @Service
 public class FakeStoreProductService implements ProductService{
@@ -29,6 +30,7 @@ public class FakeStoreProductService implements ProductService{
         //Parse FakeStoreProductDTO to Product
         return parseFakeStoreProductDTOToProduct(fakeStoreProductDTO);
     }
+    //Parse FakeStoreProductDTO to Product
     private static Product parseFakeStoreProductDTOToProduct(FakeStoreProductDTO fakeStoreProductDTO){
         if(fakeStoreProductDTO==null)
             return null;
@@ -45,7 +47,24 @@ public class FakeStoreProductService implements ProductService{
     }
     @Override
     public List<Product> getAllProducts() {
-        return List.of();
+        /*
+        ResponseEntity<List<FakeStoreProductDTO>> fakeStoreProductDtoListResponseEntity=restTemplate.getForEntity(
+                "https://fakestoreapi.com/products",
+                List<FakeStoreProductDTO>.class  // compilation error as at run time generic type is erased so its class cant be derived
+        );
+
+        */
+        //instead of List<FakeStoreProductDto>-Generic use array of FakeStoreProductDto which is not generics
+        ResponseEntity<FakeStoreProductDTO[]> fakeStoreProductDtoListResponseEntity=restTemplate.getForEntity(
+                "https://fakestoreapi.com/products",
+                FakeStoreProductDTO[].class
+        );
+        FakeStoreProductDTO[] fakeStoreProductDtoList=fakeStoreProductDtoListResponseEntity.getBody();
+        List<Product> products=new ArrayList<>();
+        for(FakeStoreProductDTO fakeStoreProductDTO:fakeStoreProductDtoList){
+            products.add(parseFakeStoreProductDTOToProduct(fakeStoreProductDTO));
+        }
+        return products;
     }
 
     @Override

@@ -12,4 +12,11 @@ public interface ProductService {
     List<Product> getAllProducts();
     Product createProduct( Product product);
     boolean deleteProduct( Long productId);
+    //default  method-if only one implementation need to define it , out of many implementation,can be overridden optionally
+    /*
+    default void sample()
+    {
+        //sample body
+    }
+    */
 }
