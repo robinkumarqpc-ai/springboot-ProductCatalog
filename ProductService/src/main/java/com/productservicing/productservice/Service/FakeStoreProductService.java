@@ -1,6 +1,7 @@
 package com.productservicing.productservice.Service;
 
 import com.productservicing.productservice.DTOS.FakeStoreProductDTO;
+import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Category;
 import com.productservicing.productservice.Models.Product;
 import lombok.extern.apachecommons.CommonsLog;
@@ -22,13 +23,20 @@ public class FakeStoreProductService implements ProductService{
     }
 
     @Override
-    public Product getSingleProduct(Long productId) {
+    public Product getSingleProduct(Long productId) throws ProductNotFoundExceptions {
+        //throw new RuntimeException("Something went wrong");
+
         ResponseEntity<FakeStoreProductDTO> fakeStoreProductDTOResponseEntity=restTemplate.getForEntity(
                 "https://fakestoreapi.com/products/"+productId, FakeStoreProductDTO.class);
         FakeStoreProductDTO fakeStoreProductDTO=fakeStoreProductDTOResponseEntity.getBody();
 
         //Parse FakeStoreProductDTO to Product
+        //throw new RuntimeException("Something went wrong");
+        if(fakeStoreProductDTO==null)
+            throw  new ProductNotFoundExceptions("Product:" + productId + "Not Found");
         return parseFakeStoreProductDTOToProduct(fakeStoreProductDTO);
+
+
     }
     //Parse FakeStoreProductDTO to Product
     private static Product parseFakeStoreProductDTOToProduct(FakeStoreProductDTO fakeStoreProductDTO){

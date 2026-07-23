@@ -1,7 +1,9 @@
 package com.productservicing.productservice.Controllers;
 
+import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Product;
 import com.productservicing.productservice.Service.ProductService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +20,21 @@ public class ProductController {
         this.productService = productService;
     }
 
+
     @GetMapping("/{id}")
-    public Product getSingleProduct(@PathVariable("id") Long productId) {
-        return  this.productService.getSingleProduct(productId);
+    public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId) throws ProductNotFoundExceptions {
+        //throw new RuntimeException("Something went wrong");
+        ResponseEntity<Product> responseEntityProduct=
+                new ResponseEntity<>(
+                        this.productService.getSingleProduct(productId),
+                        HttpStatus.OK
+
+                );
+        return responseEntityProduct;
     }
+
+
+
 
     @GetMapping()
     public List<Product> getAllProducts() {
@@ -37,6 +50,20 @@ public class ProductController {
         return null;
     }
     //Update API-UpdateProduct-Patch,replaceProduct-PUT
+
+    /*
+          @ExceptionalHandler
+          @ExceptionHandler(ProductNotFoundExceptions.class)
+    public ResponseEntity<ProductNotFoundExceptionDTO> handleProductNotFoundException(ProductNotFoundExceptions ex, HttpServletResponse response) {
+        ProductNotFoundExceptionDTO productNotFoundExceptionDTO=new ProductNotFoundExceptionDTO();
+        productNotFoundExceptionDTO.setMessage("Product Not Found");
+        productNotFoundExceptionDTO.setResolution("Provide correct Product ID");
+        //To-Do - productNotFoundExceptionDTO.setProductId("");
+        return new ResponseEntity<>(
+                productNotFoundExceptionDTO
+                ,HttpStatus.NOT_FOUND);
+    }
+     */
 
 
 }
