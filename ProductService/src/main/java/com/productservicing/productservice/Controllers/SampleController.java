@@ -11,9 +11,7 @@ public class SampleController {
     {
         StringBuilder result = new StringBuilder();
 
-        for (int i = 0; i < n; i++) {
-            result.append(name);
-        }
+        result.repeat(String.valueOf(name), Math.max(0, n));
 
         return result.toString();
     }
