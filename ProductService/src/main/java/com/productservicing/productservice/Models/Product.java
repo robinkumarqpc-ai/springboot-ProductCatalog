@@ -1,5 +1,6 @@
 package com.productservicing.productservice.Models;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
