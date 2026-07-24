@@ -3,6 +3,7 @@ package com.productservicing.productservice.Controllers;
 import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Product;
 import com.productservicing.productservice.Service.ProductService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,8 @@ public class ProductController {
 
     private ProductService productService;
 
-    public ProductController(ProductService productService) {
+    //public ProductController(@Qualifier("${Variable_Name}"-For more Flexiblity in injecting , by deciding which to inject from config)  ProductService productService) {
+    public ProductController(@Qualifier("FakeStoreProductService")  ProductService productService) {
         this.productService = productService;
     }
 
