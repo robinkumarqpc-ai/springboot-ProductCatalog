@@ -33,7 +33,17 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     List<Product> findAllByCategory_Id(Long categoryId);
     //JOIN query
     List<Product> findAllByCategory_Name(String categoryName);
+    /*
     @Query("select title from Product  where id = ?")
     Optional<Product> findProductTitleById(Long productId);
 
+     */
+    //Insert/Update as needed-upsert operation
+    @Override
+    Product save(Product product);
+
+    @Override
+    void deleteById(Long productId);
+
+    Product getProductById(Long id);
 }

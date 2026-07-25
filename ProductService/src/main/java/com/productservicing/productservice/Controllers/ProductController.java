@@ -1,5 +1,6 @@
 package com.productservicing.productservice.Controllers;
 
+import com.productservicing.productservice.Exceptions.CategoryNotFoundException;
 import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Product;
 import com.productservicing.productservice.Service.ProductService;
@@ -18,7 +19,7 @@ public class ProductController {
     private ProductService productService;
 
     //public ProductController(@Qualifier("${Variable_Name}"-For more Flexiblity in injecting , by deciding which to inject from config)  ProductService productService) {
-    public ProductController(@Qualifier("FakeStoreProductService")  ProductService productService) {
+    public ProductController(@Qualifier("StorageProductService")  ProductService productService) {
         this.productService = productService;
     }
 
@@ -44,8 +45,8 @@ public class ProductController {
     }
 
     @PostMapping()
-    public Product createProduct(@RequestBody Product product) {
-        return  new Product();
+    public Product createProduct(@RequestBody Product product) throws CategoryNotFoundException {
+        return productService.createProduct(product);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long productId) {

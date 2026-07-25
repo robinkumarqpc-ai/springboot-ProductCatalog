@@ -1,6 +1,7 @@
 package com.productservicing.productservice.Service;
 
 import com.productservicing.productservice.DTOS.FakeStoreProductDTO;
+import com.productservicing.productservice.Exceptions.CategoryNotFoundException;
 import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Category;
 import com.productservicing.productservice.Models.Product;
@@ -76,12 +77,12 @@ public class FakeStoreProductService implements ProductService{
     }
 
     @Override
-    public Product createProduct(Product product) {
+    public Product createProduct(Product product) throws CategoryNotFoundException {
         return null;
     }
 
     @Override
-    public boolean deleteProduct(Long productId) {
-        return false;
+    public void deleteProduct(Long productId) {
+        
     }
 }
