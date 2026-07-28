@@ -15,7 +15,7 @@ public class Product extends BaseModel{
     private String title;
     private Double price;
     private String description;
-    private String imgURL;
+    private String imageURL;
     @ManyToOne //If not defined it fails at Compile - time , Since category is not plain object rather an entity
     private Category category;
 }
