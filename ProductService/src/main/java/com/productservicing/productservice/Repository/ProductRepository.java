@@ -98,7 +98,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
      */
     @Query("select p from Product p  where p.id = :id")
     Optional<Product> findProductWithGivenId(@Param("id") long productId);
-    //SQL
+    //SQLnative query
     @Query(value = "select * from Product  where id = :id",nativeQuery = true)
     Optional<Product> findProductWithGivenIdNative(@Param("id") long productId);
 
