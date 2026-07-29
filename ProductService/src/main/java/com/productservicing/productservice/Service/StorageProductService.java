@@ -49,7 +49,7 @@ public class StorageProductService implements ProductService{
 
     @Override
     public Product createProduct(Product product) throws CategoryNotFoundException {
-        Category category=product.getCategory();
+        /*Category category=product.getCategory();
         if(category==null)
             throw  new CategoryNotFoundException("Category Mandatory For creation of Product");
         if(category.getId()==null)
@@ -67,7 +67,7 @@ public class StorageProductService implements ProductService{
 
         }
 
-        product.setCategory(category);
+        product.setCategory(category);*/
         return this.productRepository.save(product);
     }
 
