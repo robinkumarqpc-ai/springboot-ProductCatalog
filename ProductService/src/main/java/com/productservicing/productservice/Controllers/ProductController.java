@@ -19,12 +19,12 @@ public class ProductController {
     private ProductService productService;
 
     //public ProductController(@Qualifier("${Variable_Name}"-For more Flexiblity in injecting , by deciding which to inject from config)  ProductService productService) {
-    public ProductController(@Qualifier("StorageProductService")  ProductService productService) {
+    public ProductController( /*@Qualifier("StorageProductService")*/  ProductService productService) {
         this.productService = productService;
     }
 
 
-    @GetMapping("/{id}")
+    /*@GetMapping("/{id}")
     public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId) throws ProductNotFoundExceptions {
         //throw new RuntimeException("Something went wrong");
         ResponseEntity<Product> responseEntityProduct=
@@ -34,6 +34,20 @@ public class ProductController {
 
                 );
         return responseEntityProduct;
+    }*/
+    @GetMapping("/{id}")
+    public Product getSingleProduct(@PathVariable("id") Long productId) throws ProductNotFoundExceptions {
+        //throw new RuntimeException("Something went wrong");
+        System.out.println("DEBUG POINT");
+        Product response=this.productService.getSingleProduct(productId);
+        response.setPrice(980.0);
+        return response;
+//        Product dummyProduct = new Product();
+//        dummyProduct.setTitle("Dummy Product");
+//        dummyProduct.setPrice(980.0);
+//        dummyProduct.setDescription("This is a dummy product for testing");
+//        dummyProduct.setImageURL("http://example.com/dummy.png");
+//        return dummyProduct;
     }
 
 

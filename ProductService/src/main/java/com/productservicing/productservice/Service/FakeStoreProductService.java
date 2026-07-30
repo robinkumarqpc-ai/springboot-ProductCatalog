@@ -6,6 +6,7 @@ import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Category;
 import com.productservicing.productservice.Models.Product;
 import lombok.extern.apachecommons.CommonsLog;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-@Service("FakeStoreProductService")
+@Service//("FakeStoreProductService")
+@Primary
 public class FakeStoreProductService implements ProductService{
     //This Service Class Will Get Product info by interacting with 3rd party API-FakseStore.
 

@@ -1,8 +1,8 @@
 # Unit Testing Notes
 
 Notes on unit testing concepts and practices used in this project (JUnit 5, Mockito,
-`spring-boot-starter-webmvc-test`, and `@DataJpaTest` with H2 — see the existing
-`ProductRepositoryTest`).
+`spring-boot-starter-webmvc-test`, and `@SpringBootTest` with `@MockitoBean` — see the
+existing `ProductControllerTest`).
 
 ## Why test?
 
@@ -72,9 +72,9 @@ regardless of whether it's backed by merge sort or quick sort.
 ```
 
 - **Unit** — test each method in isolation; hard-code (mock) its dependencies so only
-  that method's logic is exercised. `ProductRepositoryTest` in this repo is a unit test
-  of a single `@Query` method, using `@DataJpaTest` + H2 to isolate the JPA slice from
-  the rest of the app.
+  that method's logic is exercised. `ProductControllerTest` in this repo is a unit test
+  of `ProductController#getSingleProduct`, using `@MockitoBean` to replace the real
+  `ProductService` so only the controller's own logic is exercised.
 - **Integration** — call the real collaborators (e.g. a real `ProductService` backed by
   a real repository); only external dependencies (third-party APIs, payment gateways)
   get mocked. Slower than unit tests.
@@ -106,6 +106,10 @@ void getProductByIdTest() {
     assertThat(actual).isEqualTo(expectedProduct);
 }
 ```
+
+(This shows the plain Mockito flavor of the pattern — `@Mock`/`@InjectMocks` with no Spring
+context. `ProductControllerTest` in this repo achieves the same isolation the Spring way:
+`@SpringBootTest` + `@MockitoBean` to swap the real `ProductService` bean for a mock.)
 
 There's a spectrum of test doubles, moving from purely hard-coded to closer-to-real
 behavior:
@@ -165,8 +169,14 @@ class ProductControllerTest {
 
 ## Reference implementation in this repo
 
-`ProductService/src/test/java/com/productservicing/productservice/Repository/ProductRepositoryTest.java`
-is a working example of the ideas above: it uses `@DataJpaTest` (JPA slice only, backed
-by H2 instead of MySQL) and `TestEntityManager` to arrange data, calls the repository
-method under test, and asserts against `AssertJ`'s `assertThat` — covering both the
-positive (id exists) and negative (id doesn't exist) scenarios for the same method.
+`ProductService/src/test/java/com/productservicing/productservice/Controllers/ProductControllerTest.java`
+is a working example of the ideas above: it loads the full context with `@SpringBootTest`
+and replaces the real `ProductService` with `@MockitoBean`, then drives
+`ProductController#getSingleProduct` directly (no `MockMvc`). It covers both the
+positive case (mocked service returns a `Product`, assert on the returned object and its
+fields) and the negative case (mocked service throws `ProductNotFoundExceptions`, asserted
+via `assertThrows`) for the same method.
+
+`ProductService/src/test/java/com/productservicing/productservice/Service/StorageCategoryServiceTest.java`
+is currently a skeleton — it wires up `CategoryService`, a mocked `CategoryRepository`,
+and `ProductService` via `@Autowired`/`@Mock`, but has no `@Test` methods yet.
