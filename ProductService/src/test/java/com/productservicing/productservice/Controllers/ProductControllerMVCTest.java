@@ -2,6 +2,7 @@ package com.productservicing.productservice.Controllers;
 
 import com.productservicing.productservice.Models.Product;
 import com.productservicing.productservice.Service.ProductService;
+import com.productservicing.productservice.Utility.TokenValidation;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -21,8 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProductControllerMVCTest {
     @Autowired
     private MockMvc mockMvc;
+    //@MockitoBean
+    //private ProductService productService;
     @MockitoBean
     private ProductService productService;
+    @MockitoBean
+    private TokenValidation tokenValidation;
     @Autowired
     private ObjectMapper objectMapper;
     @Test
