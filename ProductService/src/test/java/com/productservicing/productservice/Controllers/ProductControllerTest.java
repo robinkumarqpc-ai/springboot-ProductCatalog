@@ -1,8 +1,10 @@
 package com.productservicing.productservice.Controllers;
 
+import com.productservicing.productservice.Exceptions.InvalidTokenException;
 import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Product;
 import com.productservicing.productservice.Service.ProductService;
+import com.productservicing.productservice.Utility.TokenValidation;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +19,14 @@ class ProductControllerTest {
     @MockitoBean
     private ProductService productService;
 
+    @MockitoBean
+    private TokenValidation tokenValidation;
+
     @Autowired
     private ProductController productController;
 
     @Test
-    public void test_getSingleProduct_PositiveCase() throws ProductNotFoundExceptions {
+    public void test_getSingleProduct_PositiveCase() throws ProductNotFoundExceptions, InvalidTokenException {
         //1.Arrange
         Long productId=10L;
         Product expectedResponse = new Product();
@@ -32,9 +37,8 @@ class ProductControllerTest {
         when(productService.getSingleProduct(productId)).thenReturn(expectedResponse);
 
         //2.Act
-        Product actualResponse = productController.getSingleProduct(productId);
-        //--Product actualResponse = productController.getSingleProduct(100); null pointer exception no mocked value for 100 , so actualResponse will be null
 
+        Product actualResponse = productController.getSingleProduct(productId, "dummy-token").getBody();
 
         //3.Assert
         assertEquals(expectedResponse,actualResponse);
@@ -44,7 +48,7 @@ class ProductControllerTest {
     }
     //this case can be moved to storageproductservicetest or productserictest new create
     @Test
-    public void test_getSingleProduct_ExceptionCase() throws ProductNotFoundExceptions {
+    public void test_getSingleProduct_ExceptionCase() throws ProductNotFoundExceptions, InvalidTokenException {
         //1.Arrange - to manage input and output
         Long productID=-10L;
         when((productService.getSingleProduct(-10L))).thenThrow(new ProductNotFoundExceptions("Product:" + productID + "Not Found"));
@@ -57,7 +61,7 @@ class ProductControllerTest {
 
         assertThrows(
                 ProductNotFoundExceptions.class, //expected
-                ()->productController.getSingleProduct(productID) //act part merged in actual
+                ()->productController.getSingleProduct(productID, "dummy-token") //act part merged in actual
         );
 
         //play around to assert exception messages

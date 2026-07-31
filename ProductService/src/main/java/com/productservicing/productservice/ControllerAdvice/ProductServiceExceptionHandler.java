@@ -4,6 +4,7 @@ import com.productservicing.productservice.DTOS.CategoryNotFoundExceptionDTO;
 import com.productservicing.productservice.DTOS.ExceptionDTO;
 import com.productservicing.productservice.DTOS.ProductNotFoundExceptionDTO;
 import com.productservicing.productservice.Exceptions.CategoryNotFoundException;
+import com.productservicing.productservice.Exceptions.InvalidTokenException;
 import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,16 @@ public class ProductServiceExceptionHandler {
         return new ResponseEntity<>(
                 categoryNotFoundExceptionDTO
                 ,HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ExceptionDTO> handleInvalidTokenException(InvalidTokenException ex, HttpServletResponse response) {
+        ExceptionDTO exceptionDTO=new ExceptionDTO();
+        exceptionDTO.setMessage(ex.getMessage());
+        exceptionDTO.setResolutionDetails("Provide a valid token");
+        return new ResponseEntity<>(
+                exceptionDTO
+                ,HttpStatus.UNAUTHORIZED);
     }
 
 

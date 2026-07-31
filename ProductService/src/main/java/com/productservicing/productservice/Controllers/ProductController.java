@@ -1,9 +1,11 @@
 package com.productservicing.productservice.Controllers;
 
 import com.productservicing.productservice.Exceptions.CategoryNotFoundException;
+import com.productservicing.productservice.Exceptions.InvalidTokenException;
 import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Product;
 import com.productservicing.productservice.Service.ProductService;
+import com.productservicing.productservice.Utility.TokenValidation;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +19,25 @@ import java.util.List;
 public class ProductController {
 
     private ProductService productService;
+    private TokenValidation tokenValidation;
 
     //public ProductController(@Qualifier("${Variable_Name}"-For more Flexiblity in injecting , by deciding which to inject from config)  ProductService productService) {
-    public ProductController( /*@Qualifier("StorageProductService")*/  ProductService productService) {
+    //public ProductController( /*@Qualifier("StorageProductService")*/  ProductService productService) {
+    //    this.productService = productService;
+    //}
+    public ProductController( /*@Qualifier("StorageProductService")*/  ProductService productService, TokenValidation tokenValidation) {
         this.productService = productService;
+        this.tokenValidation = tokenValidation;
     }
 
 
-    /*@GetMapping("/{id}")
-    public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId) throws ProductNotFoundExceptions {
+    @GetMapping("/{id}")
+    //public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId,
+    //                                                  @RequestHeader("token") String tokenvalue) throws ProductNotFoundExceptions {
+    public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId,
+                                                      @RequestHeader("token") String tokenvalue) throws ProductNotFoundExceptions, InvalidTokenException {
         //throw new RuntimeException("Something went wrong");
+        tokenValidation.validateToken(tokenvalue);
         ResponseEntity<Product> responseEntityProduct=
                 new ResponseEntity<>(
                         this.productService.getSingleProduct(productId),
@@ -34,21 +45,21 @@ public class ProductController {
 
                 );
         return responseEntityProduct;
-    }*/
-    @GetMapping("/{id}")
+    }
+/*    @GetMapping("/{id}")
     public Product getSingleProduct(@PathVariable("id") Long productId) throws ProductNotFoundExceptions {
         //throw new RuntimeException("Something went wrong");
         System.out.println("DEBUG POINT");
         Product response=this.productService.getSingleProduct(productId);
         response.setPrice(980.0);
         return response;
-//        Product dummyProduct = new Product();
-//        dummyProduct.setTitle("Dummy Product");
-//        dummyProduct.setPrice(980.0);
-//        dummyProduct.setDescription("This is a dummy product for testing");
-//        dummyProduct.setImageURL("http://example.com/dummy.png");
-//        return dummyProduct;
-    }
+        Product dummyProduct = new Product();
+        dummyProduct.setTitle("Dummy Product");
+        dummyProduct.setPrice(980.0);
+        dummyProduct.setDescription("This is a dummy product for testing");
+        dummyProduct.setImageURL("http://example.com/dummy.png");
+        return dummyProduct;
+    }*/
 
 
 
