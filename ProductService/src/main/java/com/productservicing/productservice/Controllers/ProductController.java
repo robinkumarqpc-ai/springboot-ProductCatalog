@@ -7,6 +7,7 @@ import com.productservicing.productservice.Models.Product;
 import com.productservicing.productservice.Service.ProductService;
 import com.productservicing.productservice.Utility.TokenValidation;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -85,6 +86,21 @@ public class ProductController {
     @GetMapping()
     public List<Product> getAllProducts() {
         return this.productService.getAllProducts();
+    }
+
+    //Get product(s) by title with sorting and pagination.
+    //Example: GET /product/search?title=shirt&pageNumber=0&pageSize=10&sortBy=title&sortDirection=asc
+    @GetMapping("/search")
+    public ResponseEntity<Page<Product>> getProductsByTitle(
+            @RequestParam("title") String title,
+            @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "title") String sortBy,
+            @RequestParam(value = "sortDirection", defaultValue = "asc") String sortDirection) {
+        return new ResponseEntity<>(
+                this.productService.getProductsByTitle(title, pageNumber, pageSize, sortBy, sortDirection),
+                HttpStatus.OK
+        );
     }
 
     @PostMapping()

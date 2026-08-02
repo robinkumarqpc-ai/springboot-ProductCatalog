@@ -2,6 +2,8 @@ package com.productservicing.productservice.Repository;
 
 import com.productservicing.productservice.Models.Category;
 import com.productservicing.productservice.Models.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -47,6 +49,15 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
      * to guard with {@code Optional}.
      */
     List<Product> findByTitleContainsIgnoreCase(String title);
+
+    /**
+     * Derived query overload of {@link #findByTitleContainsIgnoreCase(String)} that
+     * accepts a {@link Pageable}, so sorting and pagination are pushed down to the
+     * database instead of being done in memory. Equivalent SQL:
+     * {@code select * from product where lower(title) like lower('%title%')
+     * order by ... limit ... offset ...}.
+     */
+    Page<Product> findByTitleContainsIgnoreCase(String title, Pageable pageable);
 
     /**
      * Derived query. {@code Between} maps to a SQL {@code BETWEEN} range, inclusive on

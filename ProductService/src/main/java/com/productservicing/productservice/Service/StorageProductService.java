@@ -7,6 +7,9 @@ import com.productservicing.productservice.Models.Product;
 import com.productservicing.productservice.Repository.CategoryRepository;
 import com.productservicing.productservice.Repository.ProductRepository;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -74,5 +77,12 @@ public class StorageProductService implements ProductService{
     @Override
     public void deleteProduct(Long productId) {
         this.productRepository.deleteById(productId);
+    }
+
+    @Override
+    public Page<Product> getProductsByTitle(String title, int pageNumber, int pageSize, String sortBy, String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromOptionalString(sortDirection).orElse(Sort.Direction.ASC);
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(direction, sortBy));
+        return this.productRepository.findByTitleContainsIgnoreCase(title, pageRequest);
     }
 }

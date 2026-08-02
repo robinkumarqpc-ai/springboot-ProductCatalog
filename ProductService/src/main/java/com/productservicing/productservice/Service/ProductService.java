@@ -3,6 +3,7 @@ package com.productservicing.productservice.Service;
 import com.productservicing.productservice.Exceptions.CategoryNotFoundException;
 import com.productservicing.productservice.Exceptions.ProductNotFoundExceptions;
 import com.productservicing.productservice.Models.Product;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ public interface ProductService {
     List<Product> getAllProducts();
     Product createProduct( Product product) throws CategoryNotFoundException;
     void deleteProduct( Long productId);
+    Page<Product> getProductsByTitle(String title, int pageNumber, int pageSize, String sortBy, String sortDirection);
     //default  method-if only one implementation need to define it , out of many implementation,can be overridden optionally
     /*
     default void sample()

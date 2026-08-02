@@ -7,6 +7,9 @@ import com.productservicing.productservice.Models.Category;
 import com.productservicing.productservice.Models.Product;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -14,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 @Service//("FakeStoreProductService")
 @Primary
 public class FakeStoreProductService implements ProductService{
@@ -100,5 +105,30 @@ public class FakeStoreProductService implements ProductService{
     @Override
     public void deleteProduct(Long productId) {
 
+    }
+
+    //FakeStoreProductService has no DB to push sorting/pagination down to, so filter/sort/paginate in memory over the full product list.
+    @Override
+    public Page<Product> getProductsByTitle(String title, int pageNumber, int pageSize, String sortBy, String sortDirection) {
+        List<Product> filteredProducts = getAllProducts().stream()
+                .filter(product -> product.getTitle() != null && product.getTitle().toLowerCase().contains(title.toLowerCase()))
+                .collect(Collectors.toList());
+
+        Comparator<Product> comparator = switch (sortBy) {
+            case "price" -> Comparator.comparing(Product::getPrice, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "id" -> Comparator.comparing(Product::getId, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "description" -> Comparator.comparing(Product::getDescription, Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(Product::getTitle, Comparator.nullsLast(Comparator.naturalOrder()));
+        };
+        if ("desc".equalsIgnoreCase(sortDirection)) {
+            comparator = comparator.reversed();
+        }
+        filteredProducts.sort(comparator);
+
+        int fromIndex = Math.min(pageNumber * pageSize, filteredProducts.size());
+        int toIndex = Math.min(fromIndex + pageSize, filteredProducts.size());
+        List<Product> pageContent = filteredProducts.subList(fromIndex, toIndex);
+
+        return new PageImpl<>(pageContent, PageRequest.of(pageNumber, pageSize), filteredProducts.size());
     }
 }
