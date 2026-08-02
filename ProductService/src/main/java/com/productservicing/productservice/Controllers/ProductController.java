@@ -31,13 +31,28 @@ public class ProductController {
     }
 
 
+//    @GetMapping("/{id}")
+//    //public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId,
+//    //                                                  @RequestHeader("token") String tokenvalue) throws ProductNotFoundExceptions {
+//    public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId,
+//                                                      @RequestHeader("token") String tokenvalue) throws ProductNotFoundExceptions, InvalidTokenException {
+//        //throw new RuntimeException("Something went wrong");
+//        tokenValidation.validateToken(tokenvalue);
+//        ResponseEntity<Product> responseEntityProduct=
+//                new ResponseEntity<>(
+//                        this.productService.getSingleProduct(productId),
+//                        HttpStatus.OK
+//
+//                );
+//        return responseEntityProduct;
+//    }
+
+
     @GetMapping("/{id}")
     //public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId,
     //                                                  @RequestHeader("token") String tokenvalue) throws ProductNotFoundExceptions {
-    public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId,
-                                                      @RequestHeader("token") String tokenvalue) throws ProductNotFoundExceptions, InvalidTokenException {
+    public ResponseEntity<Product> getSingleProduct(@PathVariable("id") Long productId) throws ProductNotFoundExceptions {
         //throw new RuntimeException("Something went wrong");
-        tokenValidation.validateToken(tokenvalue);
         ResponseEntity<Product> responseEntityProduct=
                 new ResponseEntity<>(
                         this.productService.getSingleProduct(productId),
@@ -46,6 +61,9 @@ public class ProductController {
                 );
         return responseEntityProduct;
     }
+
+
+
 /*    @GetMapping("/{id}")
     public Product getSingleProduct(@PathVariable("id") Long productId) throws ProductNotFoundExceptions {
         //throw new RuntimeException("Something went wrong");

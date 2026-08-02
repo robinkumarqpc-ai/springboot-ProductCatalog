@@ -7,6 +7,7 @@ import com.productservicing.productservice.Models.Category;
 import com.productservicing.productservice.Models.Product;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,21 @@ public class FakeStoreProductService implements ProductService{
     //This Service Class Will Get Product info by interacting with 3rd party API-FakseStore.
 
     private RestTemplate restTemplate;
+    private RedisTemplate<String,Object> redisTemplate;
 
-    public FakeStoreProductService(RestTemplate restTemplate) {
+    public FakeStoreProductService(RestTemplate restTemplate, RedisTemplate<String, Object> redisTemplate) {
         this.restTemplate = restTemplate;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
     public Product getSingleProduct(Long productId) throws ProductNotFoundExceptions {
+        Product product;
+        //first check if product with given id is there in cache or not , if yes return from cache
+        product=(Product) redisTemplate.opsForHash().get("PRODUCTS","PRODUCT_"+productId.toString());
+        if(product!=null)
+            return product;
+        //on cache miss return from below
         //throw new RuntimeException("Something went wrong");
 
         ResponseEntity<FakeStoreProductDTO> fakeStoreProductDTOResponseEntity=restTemplate.getForEntity(
@@ -37,7 +46,11 @@ public class FakeStoreProductService implements ProductService{
         //throw new RuntimeException("Something went wrong");
         if(fakeStoreProductDTO==null)
             throw  new ProductNotFoundExceptions("Product:" + productId + "Not Found");
-        return parseFakeStoreProductDTOToProduct(fakeStoreProductDTO);
+        //before returning store in redis first
+        product=parseFakeStoreProductDTOToProduct(fakeStoreProductDTO);
+        redisTemplate.opsForHash().put("PRODUCTS","PRODUCT_"+productId.toString(),product);
+        return product;
+        //return parseFakeStoreProductDTOToProduct(fakeStoreProductDTO);
 
 
     }
