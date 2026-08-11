@@ -34,6 +34,79 @@ The response body is a Spring Data `Page<Product>` - besides `content`, it
 serializes paging metadata (`totalElements`, `totalPages`, `number`, `size`,
 `sort`, `first`/`last`, etc.), so clients don't need a separate count call.
 
+## `Sort` / `Pageable` object structure
+
+`Sort` and `Pageable` are the two Spring Data types behind the query params,
+and they're what actually get serialized into the `Page` response - it helps
+to know their shape.
+
+`Sort` is a thin wrapper around a list of `Sort.Order`, where each `Order` is
+a `(property, direction, nullHandling, ignoreCase)` tuple:
+
+```java
+Sort.by(Sort.Direction.ASC, "title")
+// -> Sort { orders: [ Order { property: "title", direction: ASC,
+//                            nullHandling: NATIVE, ignoreCase: false } ] }
+```
+
+`PageRequest` (the standard `Pageable` implementation) adds the page
+window on top of a `Sort`:
+
+```java
+PageRequest.of(pageNumber, pageSize, sort)
+// -> PageRequest { pageNumber, pageSize, sort }
+```
+
+Both are interfaces (`Sort`, `Pageable`) with `PageRequest`/`Sort.by(...)` as
+the concrete implementations you construct - the repository/service layer
+only ever depends on the interfaces.
+
+That structure is exactly what shows up, nested, in the JSON response body.
+For `GET /product/search?title=shirt&pageNumber=0&pageSize=2&sortBy=title&sortDirection=asc`:
+
+```json
+{
+  "content": [
+    { "id": 1, "title": "Shirt A", "price": 19.99, "description": "...", "imageURL": "...", "category": { "id": 3, "name": "clothing" } },
+    { "id": 7, "title": "Shirt B", "price": 24.99, "description": "...", "imageURL": "...", "category": { "id": 3, "name": "clothing" } }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 2,
+    "sort": {
+      "sorted": true,
+      "unsorted": false,
+      "empty": false
+    },
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalElements": 5,
+  "totalPages": 3,
+  "number": 0,
+  "size": 2,
+  "sort": {
+    "sorted": true,
+    "unsorted": false,
+    "empty": false
+  },
+  "numberOfElements": 2,
+  "first": true,
+  "last": false,
+  "empty": false
+}
+```
+
+Note that `sort` appears twice - once nested inside `pageable` (the request
+that was applied) and once at the top level (the same information,
+duplicated for convenience) - and neither rendering lists the individual
+`Order` (property/direction) entries by default; Jackson's default
+`PageImpl`/`Sort` serialization only surfaces the `sorted`/`unsorted`/`empty`
+flags, not `sortBy`/`sortDirection` themselves. A caller has to remember what
+it asked for via the query params it sent, not by reading them back out of
+the response.
+
 ## Wiring
 
 `ProductService#getProductsByTitle(title, pageNumber, pageSize, sortBy, sortDirection)`
