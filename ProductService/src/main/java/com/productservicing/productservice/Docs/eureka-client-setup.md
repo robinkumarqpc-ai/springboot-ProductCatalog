@@ -71,6 +71,70 @@ untouched.
 ## Running / verifying
 
 1. Start `ServiceDiscovery` first (port `8761`).
-2. Start `ProductService` (port `8080`).
+2. Start `ProductService` (port `8080` by default - see note below).
 3. Open `http://localhost:8761` - within ~30s, `PRODUCTSERVICE` should appear
    under "Instances currently registered with Eureka".
+
+### Running multiple instances (`SERVER_PORT`)
+
+`server.port=${SERVER_PORT:8080}` in `application.properties` reads the port from
+an env var, falling back to `8080` if unset. Running the same jar with a
+different `SERVER_PORT` registers as a second, distinct instance under the same
+`PRODUCTSERVICE` application name - Eureka differentiates instances by
+`instanceId` (`host:appName:port`), so a different port is enough.
+
+In IntelliJ: **Run > Edit Configurations > (select config) > Modify options >
+Environment variables**, then add `SERVER_PORT=8081` (copy the run config for
+each additional instance/port).
+
+## Client-side load balancing demo (`service-discoverablity-test`)
+
+A minimal end-to-end example of `ProductService` calling `UserAuthService`
+*by its Eureka service name* instead of a hardcoded host/port, and having the
+call load-balanced across however many `UserAuthService` instances are
+registered at the time.
+
+### `UserAuthService` side
+
+- `Controller/ServiceDiscoverablityTestController.java` - `GET
+  /service-discoverablity-test/ping`, returns `"Hi, I am UserAuthService,
+  running on port <port>"` (port included so you can see which instance
+  answered).
+- `Security/SecurityConfig.java` - added
+  `.requestMatchers("/service-discoverablity-test/**").permitAll()` ahead of
+  the existing `.anyRequest().authenticated()` catch-all, since the default
+  chain otherwise requires auth on every endpoint.
+- Its `server.port=${USER_SERVICE_SERVER_PORT}` has **no default** - it must be
+  set (e.g. `9090`, `9091`, `9092`...) per run configuration to run multiple
+  instances, same pattern as `SERVER_PORT` above.
+
+### `ProductService` side
+
+- `pom.xml` - added `spring-cloud-starter-netflix-eureka-client`'s sibling
+  starter, `spring-cloud-starter-loadbalancer`. This is what actually resolves
+  a logical service name (`USERAUTHSERVICE`) to a real host:port pulled from
+  the Eureka registry - the Eureka client alone only maintains the registry
+  cache, it doesn't do the resolving/balancing.
+- `Configuration/ApplicationConfig.java` - the existing `createRestTemplateBean()`
+  (used by `FakeStoreProductService` and `Utility/TokenValidation`, which call
+  fixed/external URLs) is now marked `@Primary` so those keep resolving
+  unambiguously. A **second**, separate bean, `loadBalancedRestTemplate()`, is
+  annotated `@LoadBalanced` - that annotation is what makes this particular
+  `RestTemplate` resolve service names via Eureka instead of dispatching the
+  HTTP call as-is.
+- `Controllers/ServiceDiscoverablityTestController.java` - `GET
+  /service-discoverablity-test/call-user-auth`, calls
+  `http://USERAUTHSERVICE/service-discoverablity-test/ping` via the
+  load-balanced `RestTemplate` (injected with
+  `@Qualifier("loadBalancedRestTemplate")`) and returns the response.
+
+### Trying it
+
+1. Start `ServiceDiscovery`, then multiple `UserAuthService` instances (e.g.
+   `USER_SERVICE_SERVER_PORT=9090`, `9091`, `9092`), then `ProductService`.
+2. Direct pings (bypass discovery, hit one instance each):
+   `http://localhost:9090/service-discoverablity-test/ping`,
+   `.../9091/...`, `.../9092/...`.
+3. The actual load-balancing test - call this repeatedly and watch the port in
+   the response body rotate across instances:
+   `http://localhost:8080/service-discoverablity-test/call-user-auth`.

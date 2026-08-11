@@ -1,7 +1,9 @@
 package com.productservicing.productservice.Configuration;
 
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
@@ -11,8 +13,19 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class ApplicationConfig {
     @Bean
+    @Primary
     public RestTemplate createRestTemplateBean() {
         return  new RestTemplate();
+    }
+
+    // Resolves service names (e.g. http://USERAUTHSERVICE/...) against the Eureka
+    // registry instead of a hardcoded host:port. Kept separate from the bean above
+    // so existing plain RestTemplate injections (FakeStoreProductService, TokenValidation)
+    // are unaffected.
+    @Bean
+    @LoadBalanced
+    public RestTemplate loadBalancedRestTemplate() {
+        return new RestTemplate();
     }
     @Bean
     public RedisTemplate<String,Object> createRedisTemplateBean(RedisConnectionFactory redisConnectionFactory) {
